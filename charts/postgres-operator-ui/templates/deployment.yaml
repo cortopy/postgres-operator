@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ template "postgres-operator-ui.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: 10.43.0.1/32
     spec:
       serviceAccountName: {{ include "postgres-operator-ui.serviceAccountName" . }}
       {{- if .Values.imagePullSecrets }}
@@ -75,3 +77,13 @@ spec:
                     "11"
                   ]
                 }
+            # Configure backup tab variables
+            # not really working for backups
+            # https://github.com/zalando/postgres-operator/issues/937
+            - name: "SPILO_S3_BACKUP_BUCKET"
+              value: "zalando"
+          envFrom:
+            - secretRef:
+                name: zalando-environment-variables
+            - configMapRef:
+                name: environment-variables
